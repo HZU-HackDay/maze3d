@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <title>DEMO</title>
+    <script id="shader-fs" type="x-shader/x-fragment">
+        precision highp float ;
+        varying float vLightWeighting;
+        varying vec2 vTextureCoord ;
+        uniform sampler2D uSampler ;
+        void main(void) {
+            gl_FragColor = vLightWeighting*texture2D(uSampler, vTextureCoord) ;
+    	    gl_FragColor[3] = 1.0;
+        }
+    </script>
+    <script id="shader-vs" type="x-shader/x-vertex">
+        attribute vec3 aVertexNormal, aVertexPosition;
+        attribute vec2 aTextureCoord;
+
+        uniform mat4 uMVMatrix;
+        uniform mat4 uPMatrix;
+        uniform int render;
+
+        varying vec2 vTextureCoord;
+        varying float vLightWeighting;
+
+        void main(void) {
+            gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
+            vTextureCoord = aTextureCoord;
+            if (render == 1 && aVertexNormal[0] != 2.0) {
+                vLightWeighting = (1.0 - smoothstep(2.0, 20.0, length(gl_Position)) * 0.85);
+                return;
+            } else {
+                vLightWeighting = 1.0;
+                return;
+            }
+        }
+    </script>
+    <script type="text/javascript" src="./js/lib_sylvester.js"></script>
+    <script type="text/javascript" src="./js/lib_glUtils.js"></script>
+    <script type="text/javascript" src="./js/main.js"></script> 
+    <script type="text/javascript" src="./js/receive.js"></script> 
+    <link rel="stylesheet" type="text/css" href="./css/style.css">   
+</head>
+<body style="margin: 0px" onload="main()" onkeypress="start();">
+    <canvas id="canvas" style="border: none; cursor: crosshair;" width="500" height="500"></canvas>
+
+    <div class="rules" id="rules"><h1>SPACEGOO MAZE - RULES</h1>
+        <img src="./images/start.png" alt="START display" class="block3">
+    <div class="block1">
+        <span class="important">目标 :</span><br>走出迷宫.
+        <hr><br>
+        <span class="important">控制 :</span><br>
+        <label>Left button : </label>Move forward<br>
+        <label>Right button : </label>Jump<br><hr><br>
+        <span class="important">Credits :</span><br>
+                <label style="width: 75px;">Music :</label>Cool Summer by Can't Stop Won't Stop<br>
+        <span id="startButton" class="loadingText">LOADING...</span>
+    </div>
+    <img src="./images/end.png" alt="END display" class="block2">
+    </div>
+    <div class="loading" id="loading">
+        <p>LOADING LEVEL <span id="level2"></span> ...</p>
+    </div>
+    <div class="bar">
+        LEVEL : <span id="level">1</span>
+    </div>
+    <div class="bar" style="left: 200px;">
+        TIME : <span id="timer">0</span> s
+    </div>
+    <div class="bar" style="left: 400px;">
+        <img src="./images/hpOn.png" onclick="setSound();" id="hp">
+    </div>
+    <audio id="audio" src="./music/arnaud.ogg" autoplay="" preload="" loop=""></audio>
+    <audio id="audioEnd" src="./music/end.ogg" preload=""></audio>
+    <audio id="audioJump" src="./music/jump.ogg" preload=""></audio>
+    <audio id="audioJump2" src="./music/jump2.ogg" preload=""></audio>
+    <audio id="audioReverse" src="./music/chuckNorris.ogg" preload=""></audio>
+    <div class="win" id="win">
+        <h1>You win !  Congratulations !</h1>Your time : <span id="score"></span><br><br><img src="./images/win.jpg">
+    </div>
+</body>
+</html>

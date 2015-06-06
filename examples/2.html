@@ -1,0 +1,69 @@
+<canvas id="canvas"></canvas>
+<script>
+//获取WebGL对象
+var webgl=canvas.getContext("experimental-webgl");
+//创建程序（仅仅是创建而已）
+var program=webgl.createProgram();
+var vs,fs,vs_s,fs_s;
+
+//创建顶点着色器和片段着色器
+vs=webgl.createShader(webgl.VERTEX_SHADER);
+fs=webgl.createShader(webgl.FRAGMENT_SHADER);
+
+//着色器程序的源码
+vs_s="attribute vec4 p;void main(){gl_Position=p;}";
+fs_s="void main(){gl_FragColor=vec4(1.0,0.0,0.0,1.0);}";
+
+//把源码添加进着色器
+webgl.shaderSource(vs,vs_s);
+webgl.shaderSource(fs,fs_s);
+
+//编译着色器
+webgl.compileShader(vs);
+webgl.compileShader(fs);
+
+//把着色器添加到程序中
+webgl.attachShader(program,vs);
+webgl.attachShader(program,fs);
+
+//把这两个着色器程序链接成一个完整的程序
+webgl.linkProgram(program);
+
+//把这个程序放入显存中
+webgl.useProgram(program);
+
+//定义一个顶点数组，为了构造矩形需要四个顶点
+var dat=[-0.5,-0.5,0,1 ,-0.5,0.5,0,1 ,0.5,-0.5,0,1 ,0.5,0.5,0,1];
+
+//离散数组对象转换为连续内存数组
+dat=new Float32Array(dat);
+
+//在显存中建立一个数据缓冲区
+var buf=webgl.createBuffer();
+
+//设置这个缓冲区为当前操作对象
+webgl.bindBuffer(webgl.ARRAY_BUFFER,buf);
+
+//把顶点数组放入当前操作的缓冲区中
+webgl.bufferData(webgl.ARRAY_BUFFER,dat,webgl.STATIC_DRAW);
+
+//获取“顶点数据源”接口p的序号
+var p=webgl.getAttribLocation(program,"p");
+
+//开启p的数组模式
+webgl.enableVertexAttribArray(p);
+
+//把当前工作的缓冲区指定给p这个接口
+webgl.vertexAttribPointer(p,4,webgl.FLOAT,false,0,0);
+
+//把索引放入显存
+var index=webgl.createBuffer();
+webgl.bindBuffer(webgl.ELEMENT_ARRAY_BUFFER,index);
+webgl.bufferData(
+  webgl.ELEMENT_ARRAY_BUFFER,
+  new Uint16Array([0,1,2,1,2,3]),
+  webgl.STATIC_DRAW
+);
+//绘制索引（注意索引数据必须在当前工作缓冲区中）
+webgl.drawElements(webgl.TRIANGLES,6,webgl.UNSIGNED_SHORT,0);
+</script>
